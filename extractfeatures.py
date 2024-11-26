@@ -1,13 +1,24 @@
-import librosa
-import numpy as np
+import os
+import pandas as pd
 
-def extract_features(file_path):
-    y, sr = librosa.load(file_path)
-    features = {
-        "tempo": librosa.beat.tempo(y, sr=sr)[0],
-        "energy": np.mean(librosa.feature.rms(y=y)),
-        "valence": np.mean(librosa.feature.mfcc(y=y, sr=sr)),
-        "chroma_stft": np.mean(librosa.feature.chroma_stft(y=y, sr=sr)),
-        "mfcc": np.mean(librosa.feature.mfcc(y=y, sr=sr).T, axis=0),
-    }
-    return features
+# Directory of the dataset
+DATASET_DIR = "dataset/"
+
+# Define moods and initialize list to store data
+moods = ["Happy", "Sad", "Energetic", "Calm"]
+data = []
+
+# Loop through each mood directory and each file
+for mood in moods:
+    folder_path = os.path.join(DATASET_DIR, mood)
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".mp3") or filename.endswith(".wav"):
+            file_path = os.path.join(folder_path, filename)
+            features = extract_features(file_path)
+            features["mood"] = mood
+            data.append(features)
+
+# Convert to DataFrame
+df = pd.DataFrame(data)
+print(df.head())
+
